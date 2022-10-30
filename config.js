@@ -1,14 +1,20 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
 
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.URI);
-
-    console.log(`MongoDB Connected: ${conn.connection.host}`.cyan.underline);
-  } catch (error) {
-    console.log(error);
-    process.exit(1);
+export class Database {
+  constructor() {
+    this.url = process.env.MONGO_URI;
   }
-};
+  async connect() {
+    try {
 
-module.exports = connectDB;
+      mongoose.connect(this.url, {
+        autoIndex: true, useNewUrlParser: true, autoCreate: true
+      })
+      console.log("Connection to MongoDB cluster was successfully")
+    } catch (error) {
+      console.log("Error connecting to MongoDB")
+      console.error(error)
+    }
+
+  }
+}

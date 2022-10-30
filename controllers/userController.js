@@ -1,8 +1,8 @@
-const bcrypt = require("bcryptjs");
-const User = require("../models/userModel");
-const asyncHandler = require("express-async-handler");
-const jwt = require("jsonwebtoken");
-const EmailValidator = require("email-validator");
+import bcrypt from "bcryptjs";
+import { UserModel } from "../models/userModel.js";
+import asyncHandler from "express-async-handler";
+import jwt from "jsonwebtoken";
+import EmailValidator from "email-validator";
 
 // generating token
 const generateToken = (id, role) => {
@@ -16,7 +16,7 @@ const validateEmail = (val) => {
 };
 
 // register user
-const handleNewUser = asyncHandler(async (req, res) => {
+export const handleNewUser = asyncHandler(async (req, res) => {
   const { email, password, name } = req.body;
   if (!email || !password || !name)
     return res.status(400).json("Email, name and password are required");
@@ -26,7 +26,7 @@ const handleNewUser = asyncHandler(async (req, res) => {
     return res.status(400).json("Invalid email");
   }
   // check if user exist in database
-  const duplicate = await User.findOne({ email });
+  const duplicate = await UserModel.findOne({ email });
   if (duplicate) return res.status(409).json("User already exist");
 
   try {
@@ -35,7 +35,7 @@ const handleNewUser = asyncHandler(async (req, res) => {
     const hashedPwd = await bcrypt.hash(password, salt);
 
     //create and store new user
-    const createUser = await User.create({
+    const createUser = await UserModel.create({
       email: email,
       password: hashedPwd,
       name: name,
@@ -55,7 +55,7 @@ const handleNewUser = asyncHandler(async (req, res) => {
 });
 
 //login user
-const login = asyncHandler(async (req, res) => {
+export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password)
@@ -67,7 +67,7 @@ const login = asyncHandler(async (req, res) => {
   }
 
   //check if user exist
-  const user = await User.findOne({ email });
+  const user = await UserModel.findOne({ email });
   if (!user)
     return res
       .status(404)
@@ -79,7 +79,7 @@ const login = asyncHandler(async (req, res) => {
 
     //log user in
     if (validatePassword) {
-      
+
       return res.status(200).json({
         _id: user._id,
         email: user.email,
@@ -95,7 +95,7 @@ const login = asyncHandler(async (req, res) => {
 });
 
 // get me
-const getMe = asyncHandler(async (req, res) => {
+export const getMe = asyncHandler(async (req, res) => {
   const { _id, name, email } = await User.findById(req.user.id);
 
   res.status(200).json({
@@ -106,13 +106,13 @@ const getMe = asyncHandler(async (req, res) => {
 });
 
 //get all users
-const getUsers = asyncHandler(async (req, res) => {
-  const users = await User.find();
+export const getUsers = asyncHandler(async (req, res) => {
+  const users = await UserModel.find();
   res.status(200).json({ users });
 });
 
 //update user
-const updateUser = asyncHandler(async (req, res) => {
+export const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   // const user = await User.findById(id);
   const { email, password, name } = req.body;
@@ -149,7 +149,7 @@ const updateUser = asyncHandler(async (req, res) => {
 });
 
 //delete user
-const deleteUser = asyncHandler(async (req, res) => {
+export const deleteUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
 
   if (req.user._id.toString() !== id && req.user.role !== "admin") {
@@ -165,12 +165,3 @@ const deleteUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(`User with ${req.user.email} has been deleted successfully`);
 });
-
-module.exports = {
-  handleNewUser,
-  getUsers,
-  updateUser,
-  deleteUser,
-  login,
-  getMe,
-};

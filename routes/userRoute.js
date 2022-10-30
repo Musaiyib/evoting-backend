@@ -1,42 +1,42 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   handleNewCandidate,
   updateCandidate,
   deleteCandidate,
   getCandidates,
-} = require("../controllers/candidateController");
-const router = express.Router();
-const {
+} from "../controllers/candidateController.js";
+const userRoute = express.Router();
+import {
   handleNewUser,
   getUsers,
   updateUser,
   deleteUser,
   login,
   getMe,
-} = require("../controllers/userController");
-const { requireAuth } = require("../middleware/authMiddleware");
+} from "../controllers/userController.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
 
 // get/login elcom
-router.route("/").get(requireAuth, getMe).post(login);
+userRoute.route("/").get(requireAuth, getMe).post(login);
 
-router.route("/allusers").get(requireAuth, getUsers);
+userRoute.route("/allusers").get(requireAuth, getUsers);
 
 // registering elcom
-router.route("/register").post(handleNewUser);
+userRoute.route("/register").post(handleNewUser);
 
 // modifying/deleting elcom
-router
+userRoute
   .route("/:id")
   .put(requireAuth, updateUser)
   .delete(requireAuth, deleteUser);
 
 // registering candidate
-router.route("/register/candidate").post(handleNewCandidate);
-router.route("/candidates").get(getCandidates);
+userRoute.route("/register/candidate").post(handleNewCandidate);
+userRoute.route("/candidates").get(getCandidates);
 
 // modifying/deleting candidate
-router
+userRoute
   .route("/candidate/:id")
   .put(requireAuth, updateCandidate)
   .delete(requireAuth, deleteCandidate);
-module.exports = router;
+export default userRoute;

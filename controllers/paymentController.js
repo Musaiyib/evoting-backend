@@ -1,11 +1,11 @@
-const asyncHandler = require("express-async-handler");
-const Payments = require("../models/paymentModel");
-const User = require("../models/userModel");
+import asyncHandler from "express-async-handler";
+import { PaymentModel } from "../models/paymentModel.js";
+import { UserModel } from "../models/userModel.js";
 
 // get all payment
-const getPayments = asyncHandler(async (req, res) => {
+export const getPayments = asyncHandler(async (req, res) => {
   try {
-    const payments = await Payments.find();
+    const payments = await PaymentModel.find();
     res.status(200).json({ payments });
   } catch {
     res.status(400).json("Please Make sure you are connected to the internet");
@@ -13,7 +13,7 @@ const getPayments = asyncHandler(async (req, res) => {
 });
 
 // add payment
-const setPayment = asyncHandler(async (req, res) => {
+export const setPayment = asyncHandler(async (req, res) => {
   const { name, regNo, amount, phone } = req.body;
   if (!name || !regNo || !amount || !phone) {
     return res.status(400).json("name, regNo and amount are required");
@@ -38,11 +38,11 @@ const setPayment = asyncHandler(async (req, res) => {
 });
 
 //update payment
-const updatePayment = asyncHandler(async (req, res) => {
+export const updatePayment = asyncHandler(async (req, res) => {
   const id = req.params.id;
   const payment = await Payments.findById(id);
 
-  const user = await User.findById(req.user.id);
+  const user = await UserModel.findById(req.user.id);
   // check for user
   if (!user) {
     return res.status(401).json("User not found");
@@ -57,12 +57,12 @@ const updatePayment = asyncHandler(async (req, res) => {
     return res.status(404).json("Payment not found");
   }
   const { regNo } = req.body;
-  const duplicate = await Payments.findOne({ regNo });
+  const duplicate = await PaymentModel.findOne({ regNo });
   if (duplicate)
     return res.status(409).json(`${regNo} registration number already exits`);
 
   try {
-    const update = await Payments.findByIdAndUpdate(id, req.body, {
+    const update = await PaymentModel.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     return res.status(200).json(update);
@@ -72,11 +72,11 @@ const updatePayment = asyncHandler(async (req, res) => {
 });
 
 // delete payment
-const deletePayment = asyncHandler(async (req, res) => {
+export const deletePayment = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const payment = await Payments.findById(id);
+  const payment = await PaymentModel.findById(id);
 
-  const user = await User.findById(req.user.id);
+  const user = await UserModel.findById(req.user.id);
   // check for user
   if (!user) {
     return res.status(401).json("User not found");
@@ -95,4 +95,3 @@ const deletePayment = asyncHandler(async (req, res) => {
   res.status(200).json(`${payment.regNo} has been deleted successfully`);
 });
 
-module.exports = { getPayments, setPayment, updatePayment, deletePayment };
