@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import  mongoose from"mongoose";
 
-const candidateModel = mongoose.Schema(
+const CandidateSchema = mongoose.Schema(
   {
     // user: {
     //   type: mongoose.Schema.Types.ObjectId,
@@ -14,10 +14,12 @@ const candidateModel = mongoose.Schema(
     nickname: {
       type: String,
       required: true,
+      unique: true
     },
     regNo: {
       type: String,
       required: true,
+      unique: true
     },
     level: {
       type: Number,
@@ -27,11 +29,12 @@ const candidateModel = mongoose.Schema(
       type: String,
       required: true,
       default: 0,
+      unique: true
     },
   },
   {
-    timestamps: true,
+    timestamps: { type: Number,  default: Date.now() },
   }
 );
 
-module.exports = mongoose.model("Candidates", candidateModel);
+export const CandidateModel = mongoose.model("Candidate", CandidateSchema);

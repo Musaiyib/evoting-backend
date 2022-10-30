@@ -1,8 +1,8 @@
-const bcrypt = require("bcryptjs");
-const Candidate = require("../models/candidateModel");
-const asyncHandler = require("express-async-handler");
-const jwt = require("jsonwebtoken");
-const EmailValidator = require("email-validator");
+import bcrypt from "bcryptjs";
+import { CandidateModel } from "../models/candidateModel.js";
+import asyncHandler from "express-async-handler";
+import  jwt from "jsonwebtoken";
+import EmailValidator from "email-validator";
 
 // generating token
 const generateToken = (id, role) => {
@@ -16,13 +16,13 @@ const validateEmail = (val) => {
 };
 
 // register user
-const handleNewCandidate = asyncHandler(async (req, res) => {
+export const handleNewCandidate = asyncHandler(async (req, res) => {
   const { name, nickname, regNo, level, phone } = req.body;
   if (!name || !nickname || !regNo || !level || !phone)
     return res.status(400).json("All fields are required");
 
   // check if user exist in database
-  const duplicate = await Candidate.findOne({ regNo });
+  const duplicate = await CandidateModel.findOne({ regNo });
   if (duplicate)
     return res.status(409).json(`Candidate with ${regNo} already exist`);
 
@@ -30,7 +30,7 @@ const handleNewCandidate = asyncHandler(async (req, res) => {
     // encrypting the password
 
     //create and store new user
-    const createUser = await Candidate.create({
+    const createUser = await CandidateModel.create({
       name,
       nickname,
       regNo,
@@ -48,9 +48,9 @@ const handleNewCandidate = asyncHandler(async (req, res) => {
 });
 
 // get all candidates
-const getCandidates = asyncHandler(async (req, res) => {
+export const getCandidates = asyncHandler(async (req, res) => {
   try {
-    const candidates = await Candidate.find();
+    const candidates = await CandidateModel.find();
     res.status(200).json(candidates);
   } catch (error) {
     console.log(error);
@@ -59,9 +59,9 @@ const getCandidates = asyncHandler(async (req, res) => {
 });
 
 //update user
-const updateCandidate = asyncHandler(async (req, res) => {
+export const updateCandidate = asyncHandler(async (req, res) => {
   const id = req.params.id;
-  const candidate = await Candidate.findById(id);
+  const candidate = await CandidateModel.findById(id);
 
   if (!candidate) {
     res.status(404).json("Unable to find this candidate");
@@ -69,7 +69,7 @@ const updateCandidate = asyncHandler(async (req, res) => {
 
   const { name, nickname, regNo, level, phone } = req.body;
   try {
-    const update = await Candidate.findByIdAndUpdate(
+    const update = await CandidateModel.findByIdAndUpdate(
       id,
       {
         name,
@@ -90,11 +90,11 @@ const updateCandidate = asyncHandler(async (req, res) => {
 });
 
 //delete user
-const deleteCandidate = asyncHandler(async (req, res) => {
+export const deleteCandidate = asyncHandler(async (req, res) => {
   const id = req.params.id;
 
   try {
-    await Candidate.findByIdAndDelete(id);
+    await CandidateModel.findByIdAndDelete(id);
     res.status(200).json("Candidate has been delete successfully");
   } catch (error) {
     console.log(error);
@@ -102,13 +102,13 @@ const deleteCandidate = asyncHandler(async (req, res) => {
   }
 });
 
-const vote = asyncHandler(async (req, res) => {
+export const vote = asyncHandler(async (req, res) => {
   const { name, nickname, regNo, level, phone } = req.body;
   if (!name || !nickname || !regNo || !level || !phone)
     return res.status(400).json("All fields are required");
 
   // check if user exist in database
-  const duplicate = await Candidate.findOne({ regNo });
+  const duplicate = await CandidateModel.findOne({ regNo });
   if (duplicate)
     return res.status(409).json(`Candidate with ${regNo} already exist`);
 
@@ -116,7 +116,7 @@ const vote = asyncHandler(async (req, res) => {
     // encrypting the password
 
     //create and store new user
-    const createUser = await Candidate.create({
+    const createUser = await CandidateModel.create({
       name,
       nickname,
       regNo,
@@ -133,10 +133,10 @@ const vote = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = {
-  getCandidates,
-  handleNewCandidate,
-  updateCandidate,
-  deleteCandidate,
-  vote,
-};
+// module.exports.default = {
+//   getCandidates,
+//   handleNewCandidate,
+//   updateCandidate,
+//   deleteCandidate,
+//   vote,
+// };
