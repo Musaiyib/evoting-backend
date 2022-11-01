@@ -5,7 +5,6 @@ import {
   deleteCandidate,
   getCandidates,
 } from "../controllers/candidateController.js";
-const userRoute = express.Router();
 import {
   handleNewUser,
   getUsers,
@@ -15,6 +14,7 @@ import {
   getMe,
 } from "../controllers/userController.js";
 import { requireAuth } from "../middleware/authMiddleware.js";
+const userRoute = express.Router();
 
 // get/login elcom
 userRoute.route("/").get(requireAuth, getMe).post(login);

@@ -12,10 +12,15 @@ const UserSchema = mongoose.Schema({
     lowercase: true,
     required: true,
   },
+  regNo: {
+    type: String,
+    lowercase: true,
+    required: true,
+  },
   role: {
     type: String,
     required: true,
-    default: "user",
+    default: "member",
   },
   password: {
     type: String,
