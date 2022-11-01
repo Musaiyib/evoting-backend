@@ -8,6 +8,7 @@ import userRoute from "./routes/userRoute.js";
 import paymentRoute from "./routes/paymentRoute.js";
 import candidateRoute from "./routes/candidateRoute.js";
 import voteRoute from "./routes/voteRoute.js"
+import rolesRoute from "./routes/rolesRoute.js"
 import cookieParser from "cookie-parser";
 
 const app = express();
@@ -18,7 +19,8 @@ app.use(cookieParser());
 app.use("/api/users", userRoute);
 app.use("/api/candidate", candidateRoute);
 app.use("/api/payments", paymentRoute);
-app.use('/api/vote', voteRoute)
+app.use('/api/vote', voteRoute);
+app.use('/api/roles', rolesRoute);
 
 const port = process.env.PORT || 4000;
 (async () => {
