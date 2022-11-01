@@ -17,17 +17,20 @@ const validateEmail = (val) => {
 
 // register user
 export const handleNewUser = asyncHandler(async (req, res) => {
-  const { email, password, name } = req.body;
-  if (!email || !password || !name)
-    return res.status(400).json("Email, name and password are required");
+  const { email, password, name, role, regNo } = req.body;
+  if (!email || !password || !name || !role || !regNo)
+    return res.status(400).json({ msg: "All are required" });
 
   // validating email
   if (validateEmail(email) === false) {
     return res.status(400).json("Invalid email");
   }
+
   // check if user exist in database
-  const duplicate = await UserModel.findOne({ email });
-  if (duplicate) return res.status(409).json("User already exist");
+  const emailDuplicate = await UserModel.findOne({ email });
+  if (emailDuplicate) return res.status(409).json("User already exist");
+  const regNoDuplicate = await UserModel.findOne({ regNo });
+  if (regNoDuplicate) return res.status(409).json("User already exist");
 
   try {
     // encrypting the password
@@ -36,9 +39,11 @@ export const handleNewUser = asyncHandler(async (req, res) => {
 
     //create and store new user
     const createUser = await UserModel.create({
-      email: email,
+      email,
+      regNo,
       password: hashedPwd,
-      name: name,
+      name,
+      role,
     });
 
     if (createUser) {
@@ -46,6 +51,8 @@ export const handleNewUser = asyncHandler(async (req, res) => {
         _id: createUser._id,
         name: createUser.name,
         email: createUser.email,
+        role: createUser.role,
+        regNo: createUser.regNo,
         token: generateToken(createUser._id, createUser.role),
       });
     }
@@ -79,11 +86,12 @@ export const login = asyncHandler(async (req, res) => {
 
     //log user in
     if (validatePassword) {
-
       return res.status(200).json({
         _id: user._id,
         email: user.email,
         name: user.name,
+        role: user.role,
+        regNo: user.regNo,
         token: generateToken(user._id, user.role),
       });
     } else {
@@ -99,9 +107,11 @@ export const getMe = asyncHandler(async (req, res) => {
   const { _id, name, email } = await User.findById(req.user.id);
 
   res.status(200).json({
-    _id: _id,
-    name,
-    email,
+    _id: user._id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    regNo: user.regNo,
   });
 });
 
@@ -115,7 +125,10 @@ export const getUsers = asyncHandler(async (req, res) => {
 export const updateUser = asyncHandler(async (req, res) => {
   const id = req.params.id;
   // const user = await User.findById(id);
-  const { email, password, name } = req.body;
+  const { email, password, name, role } = req.body;
+
+  if (!email || !password || !name || !role)
+    return res.status(400).json({ msg: "All are required" });
 
   // validating email
   if (validateEmail(email) === false) {

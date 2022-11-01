@@ -1,4 +1,4 @@
-import  mongoose from"mongoose";
+import mongoose from "mongoose";
 
 const CandidateSchema = mongoose.Schema(
   {
@@ -14,12 +14,12 @@ const CandidateSchema = mongoose.Schema(
     nickname: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     regNo: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
     level: {
       type: Number,
@@ -29,11 +29,15 @@ const CandidateSchema = mongoose.Schema(
       type: String,
       required: true,
       default: 0,
-      unique: true
+      unique: true,
+    },
+    position: {
+      type: String,
+      required: true,
     },
   },
   {
-    timestamps: { type: Number,  default: Date.now() },
+    timestamps: { type: Number, default: Date.now() },
   }
 );
 

@@ -9,6 +9,7 @@ export const NewRole = asyncHandler(async (req, res) => {
 
         if (!await RolesModel.findById("roles")) {
             await RolesModel.update({ _id: "roles", items: [req.body.role] }, { $set: { items: [req.body.role] } }, { upsert: true })
+            return res.status(200).json("new role was created successfully")
         } else {
             const find = await RolesModel.findById("roles")
             if (!(find.items).includes(req.body.role)) {

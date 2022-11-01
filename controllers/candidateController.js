@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { CandidateModel } from "../models/candidateModel.js";
 import asyncHandler from "express-async-handler";
-import  jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import EmailValidator from "email-validator";
 
 // generating token
@@ -17,8 +17,9 @@ const validateEmail = (val) => {
 
 // register user
 export const handleNewCandidate = asyncHandler(async (req, res) => {
-  const { name, nickname, regNo, level, phone } = req.body;
-  if (!name || !nickname || !regNo || !level || !phone)
+  const { name, nickName, regNo, level, phone, position } = req.body;
+  console.log(req.body);
+  if (!name || !nickName || !regNo || !level || !phone || !position)
     return res.status(400).json("All fields are required");
 
   // check if user exist in database
@@ -27,15 +28,14 @@ export const handleNewCandidate = asyncHandler(async (req, res) => {
     return res.status(409).json(`Candidate with ${regNo} already exist`);
 
   try {
-    // encrypting the password
-
     //create and store new user
     const createUser = await CandidateModel.create({
       name,
-      nickname,
+      nickname: nickName,
       regNo,
-      level,
+      level: JSON.parse(level),
       phone,
+      position,
     });
 
     if (createUser) {
