@@ -17,9 +17,8 @@ const validateEmail = (val) => {
 
 // register user
 export const handleNewCandidate = asyncHandler(async (req, res) => {
-  const { name, nickName, regNo, level, phone, position } = req.body;
-  console.log(req.body);
-  if (!name || !nickName || !regNo || !level || !phone || !position)
+  const { name, nickname, regNo, level, phone, position } = req.body;
+  if (!name || !nickname || !regNo || !level || !phone || !position)
     return res.status(400).json("All fields are required");
 
   // check if user exist in database
@@ -31,9 +30,9 @@ export const handleNewCandidate = asyncHandler(async (req, res) => {
     //create and store new user
     const createUser = await CandidateModel.create({
       name,
-      nickname: nickName,
+      nickname,
       regNo,
-      level: JSON.parse(level),
+      level,
       phone,
       position,
     });
@@ -42,7 +41,6 @@ export const handleNewCandidate = asyncHandler(async (req, res) => {
       return res.status(201).json(createUser);
     }
   } catch (error) {
-    console.log(error);
     res.status(400).json("Unable to create candidate");
   }
 });
@@ -53,7 +51,7 @@ export const getCandidates = asyncHandler(async (req, res) => {
     const candidates = await CandidateModel.find();
     res.status(200).json(candidates);
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(400).json("Unable to get candidate");
   }
 });
@@ -67,7 +65,7 @@ export const updateCandidate = asyncHandler(async (req, res) => {
     res.status(404).json("Unable to find this candidate");
   }
 
-  const { name, nickname, regNo, level, phone } = req.body;
+  const { name, nickname, regNo, level, phone, position } = req.body;
   try {
     const update = await CandidateModel.findByIdAndUpdate(
       id,
@@ -77,6 +75,7 @@ export const updateCandidate = asyncHandler(async (req, res) => {
         regNo,
         level,
         phone,
+        position,
       },
       {
         new: true,
@@ -84,7 +83,7 @@ export const updateCandidate = asyncHandler(async (req, res) => {
     );
     res.status(200).json("Candidate has successfully updated");
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(400).json("Unable to update candidate");
   }
 });
@@ -97,7 +96,7 @@ export const deleteCandidate = asyncHandler(async (req, res) => {
     await CandidateModel.findByIdAndDelete(id);
     res.status(200).json("Candidate has been delete successfully");
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(400).json("Unable to delete candidate");
   }
 });
@@ -128,7 +127,7 @@ export const vote = asyncHandler(async (req, res) => {
       return res.status(201).json(createUser);
     }
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(400).json("Unable to vote candidate");
   }
 });

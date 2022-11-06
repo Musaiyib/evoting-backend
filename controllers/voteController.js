@@ -14,15 +14,17 @@ export const NewVoter = asyncHandler(async (req, res) => {
     let { regNo, level, phone } = req.body;
     if (!regNo || !phone || !level)
       res.status(403).json(`all fields are required`);
-    await VoterModel.create({
+    const generateVoteToken = await VoterModel.create({
       regNo,
       level,
       phone,
       votePin: await randomUInt32(9),
     });
+    console.log(generateVoteToken.votePin);
+    const { votePin } = generateVoteToken;
     res.status(200).json({
       message: "new voter was registered successfully",
-      data: { regNo, level, phone },
+      data: { regNo, level, phone, votePin },
     });
   } catch (error) {
     res.status(400).json(error.message);

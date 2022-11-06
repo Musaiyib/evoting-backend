@@ -11,8 +11,11 @@ import { requireAuth } from "../middleware/authMiddleware.js";
 
 //Elcom candidate routes
 // registering candidate
-candidateRoute.route("/").get(getCandidates);
-candidateRoute.route("/register").post(handleNewCandidate);
+candidateRoute.route("/").get(requireAuth, getCandidates);
+candidateRoute.route("/register").post(requireAuth, handleNewCandidate);
 // modifying/deleting candidate
-candidateRoute.route("/:id").put(updateCandidate).delete(deleteCandidate);
+candidateRoute
+  .route("/:id")
+  .put(requireAuth, updateCandidate)
+  .delete(deleteCandidate);
 export default candidateRoute;
