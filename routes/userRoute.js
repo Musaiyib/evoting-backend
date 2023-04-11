@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  handleNewCandidate,
+  AddCandidate,
   updateCandidate,
   deleteCandidate,
   getCandidates,
@@ -19,7 +19,7 @@ const userRoute = express.Router();
 // get/login elcom
 userRoute.route("/").get(requireAuth, getMe).post(login);
 
-userRoute.route("/allusers").get(requireAuth, getUsers);
+userRoute.route("/allusers").get(getUsers);
 
 // registering elcom
 userRoute.route("/register").post(handleNewUser);
@@ -31,7 +31,7 @@ userRoute
   .delete(requireAuth, deleteUser);
 
 // registering candidate
-userRoute.route("/register/candidate").post(handleNewCandidate);
+userRoute.route("/register/candidate").post(AddCandidate);
 userRoute.route("/candidates").get(getCandidates);
 
 // modifying/deleting candidate

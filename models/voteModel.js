@@ -4,7 +4,7 @@ import { CandidateModel } from "./candidateModel.js";
 const VoteSchema = new Schema({
   regNo: {
     type: String,
-    unique: true,
+    // unique: true,
     required: true,
     validate: {
       validator: async function (regNo) {
@@ -28,13 +28,8 @@ const VoteSchema = new Schema({
     },
   },
   candidate: {
-    type: String,
-    required: true,
-    validate: {
-      validator: async function (candidate) {
-        return await validCandidate(candidate);
-      },
-    },
+    type: Schema.Types.ObjectId,
+    ref: 'Candidate'
   },
   createdAt: {
     type: Date,
@@ -47,7 +42,7 @@ const VoteSchema = new Schema({
 export const VoteModel = mongoose.model("Vote", VoteSchema);
 
 const VoterSchema = new Schema({
-  regNo: { type: String, unique: true, required: true },
+  regNo: { type: String, lowercase: true, unique: [true, 'Voter registration number must be unique'], required: true },
   votePin: {
     type: Number,
     unique: true,
@@ -62,9 +57,14 @@ const VoterSchema = new Schema({
       new Date().toLocaleString("en", { timeZone: "Africa/Lagos" })
     ),
   },
+  voted: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
   phone: {
     type: String,
-    unique: true,
+    unique: [true, 'Voter phone number must be unique'],
     minLength: 11,
     maxLength: 11,
     required: true,

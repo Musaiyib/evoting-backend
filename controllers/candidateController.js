@@ -3,6 +3,7 @@ import { CandidateModel } from "../models/candidateModel.js";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";
 import EmailValidator from "email-validator";
+import { RolesModel } from "../models/rolesModel.js";
 
 // generating token
 const generateToken = (id, role) => {
@@ -16,7 +17,7 @@ const validateEmail = (val) => {
 };
 
 // register user
-export const handleNewCandidate = asyncHandler(async (req, res) => {
+export const AddCandidate = asyncHandler(async (req, res) => {
   const { name, nickname, regNo, level, phone, position } = req.body;
   if (!name || !nickname || !regNo || !level || !phone || !position)
     return res.status(400).json("All fields are required");
@@ -41,6 +42,7 @@ export const handleNewCandidate = asyncHandler(async (req, res) => {
       return res.status(201).json(createUser);
     }
   } catch (error) {
+    console.log(error);
     res.status(400).json("Unable to create candidate");
   }
 });
@@ -48,10 +50,14 @@ export const handleNewCandidate = asyncHandler(async (req, res) => {
 // get all candidates
 export const getCandidates = asyncHandler(async (req, res) => {
   try {
+    const roles = await RolesModel.findOne({ _id: 'roles' });
     const candidates = await CandidateModel.find();
-    res.status(200).json(candidates);
+    const sortedCandidates = {};
+    roles.items.forEach((role) => {
+      sortedCandidates[role] = candidates.filter((candidate) => candidate.position === role.toLowerCase());
+    });
+    res.status(200).json(sortedCandidates);
   } catch (error) {
-    // console.log(error);
     res.status(400).json("Unable to get candidate");
   }
 });
@@ -100,42 +106,3 @@ export const deleteCandidate = asyncHandler(async (req, res) => {
     res.status(400).json("Unable to delete candidate");
   }
 });
-
-export const vote = asyncHandler(async (req, res) => {
-  const { name, nickname, regNo, level, phone } = req.body;
-  if (!name || !nickname || !regNo || !level || !phone)
-    return res.status(400).json("All fields are required");
-
-  // check if user exist in database
-  const duplicate = await CandidateModel.findOne({ regNo });
-  if (duplicate)
-    return res.status(409).json(`Candidate with ${regNo} already exist`);
-
-  try {
-    // encrypting the password
-
-    //create and store new user
-    const createUser = await CandidateModel.create({
-      name,
-      nickname,
-      regNo,
-      level,
-      phone,
-    });
-
-    if (createUser) {
-      return res.status(201).json(createUser);
-    }
-  } catch (error) {
-    // console.log(error);
-    res.status(400).json("Unable to vote candidate");
-  }
-});
-
-// module.exports.default = {
-//   getCandidates,
-//   handleNewCandidate,
-//   updateCandidate,
-//   deleteCandidate,
-//   vote,
-// };

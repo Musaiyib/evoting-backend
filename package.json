@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "type":"module",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +24,7 @@
     "find-config": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.4.3",
+    "nodemon": "^2.0.22",
     "path": "^0.12.7"
   }
 }

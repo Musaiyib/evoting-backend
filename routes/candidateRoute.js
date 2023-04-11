@@ -1,18 +1,17 @@
 import { Router } from "express";
 import {
-  handleNewCandidate,
+  AddCandidate,
   updateCandidate,
   deleteCandidate,
   getCandidates,
-  vote,
 } from "../controllers/candidateController.js";
 const candidateRoute = Router();
 import { requireAuth } from "../middleware/authMiddleware.js";
 
 //Elcom candidate routes
 // registering candidate
-candidateRoute.route("/").get(requireAuth, getCandidates);
-candidateRoute.route("/register").post(requireAuth, handleNewCandidate);
+candidateRoute.route("/").get(getCandidates);
+candidateRoute.route("/register").post(AddCandidate);
 // modifying/deleting candidate
 candidateRoute
   .route("/:id")

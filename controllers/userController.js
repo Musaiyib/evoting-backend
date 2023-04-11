@@ -66,21 +66,21 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password)
-    return res.status(400).json({ message: "Email and password are required" });
-
-  // validating email
-  if (validateEmail(email) === false) {
-    return res.status(400).json("Invalid email");
-  }
-
-  //check if user exist
-  const user = await UserModel.findOne({ email });
-  if (!user)
-    return res
-      .status(404)
-      .json({ message: `User with this email is: ${email} not found` });
-
+  return res.status(400).json({ message: "Email and password are required" });
+  
   try {
+    // validating email
+    if (validateEmail(email) === false) {
+      return res.status(400).json("Invalid email");
+    }
+
+    //check if user exist
+    const user = await UserModel.findOne({ email });
+    if (!user)
+      return res
+        .status(404)
+        .json({ message: `User with this email is: ${email} not found` });
+
     //validating user password
     const validatePassword = await bcrypt.compare(password, user.password);
 
@@ -117,7 +117,7 @@ export const getMe = asyncHandler(async (req, res) => {
 
 //get all users
 export const getUsers = asyncHandler(async (req, res) => {
-  const users = await UserModel.find();
+  const users = await UserModel.find().select('-password');
   res.status(200).json({ users });
 });
 

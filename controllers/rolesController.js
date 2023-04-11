@@ -3,7 +3,6 @@ import asyncHandler from "express-async-handler";
 
 export const NewRole = asyncHandler(async (req, res) => {
   if (!req.body.role) return res.status(403).json("error missing field role");
-  console.log(req.body.role);
   try {
     if (!(await RolesModel.findById("roles"))) {
       await RolesModel.update(
@@ -22,6 +21,15 @@ export const NewRole = asyncHandler(async (req, res) => {
         res.status(200).json("role already existing");
       }
     }
+  } catch (error) {
+    console.log("error", error.message);
+  }
+});
+
+export const GetRoles = asyncHandler(async (req, res) => {
+  try {
+      const roles = await RolesModel.find().select('_id items role');
+      return res.status(200).json(roles[0].items);
   } catch (error) {
     console.log("error", error.message);
   }

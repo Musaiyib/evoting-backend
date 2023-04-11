@@ -35,6 +35,10 @@ const CandidateSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    votes: {
+      type: Number,
+      default: 0
+    }
   },
   {
     timestamps: { type: Number, default: Date.now() },
