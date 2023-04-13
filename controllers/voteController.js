@@ -93,49 +93,75 @@ export const Vote = asyncHandler(async (req, res) => {
       return res.status(400).json({ msg: "All fields are required" });
     }
 
+    const voter = await VoterModel.findOne({ regNo: regNo })
+    
+    if (!voter) {
+      return res.status(404).json({msg: `Can't find user with this registration number: ${regNo}`})
+    }
+
+    if (voter.voted){
+      return res.status(400).json({ msg: "You have already voted" });
+    }
+
     // Check if votePin is used
     const votePinExists = await VoteModel.findOne({ votePin });
     if (votePinExists) {
       return res.status(400).json({ msg: "Vote token already used" });
     }
 
-    // Update the voted field in the VoterModel
-    await VoterModel.findOneAndUpdate({ regNo: regNo }, { voted: true });
 
-    // Create a vote for each candidate
-    const votes = await Promise.all(
-      Object.keys(candidates).map(async (position) => {
-        const candidate = candidates[position];
-
-        // Check if candidate exists
-        if (candidate) {
-          // Increment the votes count
-          candidate.votes = candidate.votes + 1;
-
-          // Save the updated candidate object
-          await CandidateModel.findOneAndUpdate(
-            { _id: candidate._id },
-            { $set: candidate },
-            { new: true }
-          );
-
-          // Update the existing vote document or create a new one
-          return await VoteModel.updateOne(
-            { regNo: regNo },
-            { $set: { votePin: votePin, candidate: candidate._id } },
-            { upsert: true }
-          );
-        }
-        else {
-          // Create a vote for the current candidate
-          return await VoteModel.create({
-            regNo,
-            votePin,
-            position
-          });
-        }
+     // Filtering out positions with null values and creating an array of candidates with only the key and _id
+    const votedCandidates = []
+    const candidatesArray = Object.keys(candidates)
+      .filter((position) => {
+        if(candidates[position])
+          return candidates[position]
+        else
+          votedCandidates.push({ [position]: null });
+          return { [position]: null };
       })
-    );
+      .map(async (position) => {
+        if (candidates[position] !== null) {
+          const candidateId = candidates[position]._id;
+          const candidate = await CandidateModel.findById(candidateId);
+          if (candidate) {
+            candidate.votes += 1;
+            await candidate.save();
+            votedCandidates.unshift({
+              [position]: {
+                _id: candidateId,
+                name: candidate.name,
+              },
+            });
+            return {
+              [position]: {
+                _id: candidateId,
+                name: candidate.name,
+              },
+            };
+          } else {
+            votedCandidates.push({ [position]: null });
+            return { [position]: null };
+          }
+        } else {
+          votedCandidates.push({ [position]: null });
+          return { [position]: null };
+        }
+      });
+    
+    // Waiting for all promises to resolve
+    await Promise.all(candidatesArray);
+
+    //Updating voter voted status
+    voter.voted = true
+    await voter.save();
+
+    // Creating a new vote document using the VoteModel.create method
+    const votes = await VoteModel.create({
+      regNo,
+      votePin,
+      candidates: votedCandidates,
+    });
 
     return res.status(200).json({ msg: "Voted!", votes });
   } catch (error) {
