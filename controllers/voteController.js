@@ -37,7 +37,7 @@ export const NewVoter = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({msg: "Internal server error"});
-    console.log(error.message);
+    console.error(error.message);
   }
 });
 
@@ -48,7 +48,6 @@ export const GetVoter = asyncHandler(async (req, res) => {
       return res.status(400).json({msg: `all fields are required`});
 
     const findByRegNo = await VoterModel.findOne({regNo: regNo})
-    console.log(findByRegNo);
     if(!findByRegNo)
       return res.status(404).json({msg: `We can't find a user with this registraion number: ${regNo}`})
       
@@ -67,7 +66,7 @@ export const GetVoter = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({msg: "Internal server error"});
-    console.log(error.message);
+    console.error(error.message);
   }
 });
 
@@ -80,7 +79,7 @@ export const GetAllVoters = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({msg: "Internal server error"});
-    console.log(error.message);
+    console.error(error.message);
   }
 });
 
@@ -163,9 +162,9 @@ export const Vote = asyncHandler(async (req, res) => {
       candidates: votedCandidates,
     });
 
-    return res.status(200).json({ msg: "Voted!", votes });
+    return res.status(200).json({ msg: "Voted!", votes: votes });
   } catch (error) {
-    console.log(error.message);
+    console.error(error.message);
     return res.status(500).json({ msg: "Internal server error" });
   }
 });
@@ -175,7 +174,7 @@ export const loginVoter = asyncHandler(async (req, res) => {
   try {
     const { regNo, votePin } = req.body;
     if ((!regNo || !votePin))
-      return res.status(400).json({msf: `all fields are required`});
+      return res.status(400).json({msg: `All fields are required`});
 
     // check if votePin is used
     // if (votePinExist) {
@@ -183,15 +182,14 @@ export const loginVoter = asyncHandler(async (req, res) => {
     // }
 
     const voter = await VoterModel.findOne({
-      votePin
+      regNo: regNo
     });
-    console.log(voter);
     if(voter.regNo !== regNo.toLowerCase()){
       return res.status(400).json({msg: "Invalid registration number or vote token"})
     }
-    return res.status(200).json(voter);
+    return res.status(200).json({msg: "Login successul", voter});
   } catch (error) {
-    res.status(500).json({msg: "internale server error"});
-    console.log(error.message);
+    res.status(500).json({msg: "Internale server error"});
+    console.error(error.message);
   }
 });

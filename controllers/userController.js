@@ -23,14 +23,14 @@ export const handleNewUser = asyncHandler(async (req, res) => {
 
   // validating email
   if (validateEmail(email) === false) {
-    return res.status(400).json("Invalid email");
+    return res.status(400).json({msg: "Invalid email"});
   }
 
   // check if user exist in database
   const emailDuplicate = await UserModel.findOne({ email });
-  if (emailDuplicate) return res.status(409).json("User already exist");
+  if (emailDuplicate) return res.status(409).json({msg: "User already exist"});
   const regNoDuplicate = await UserModel.findOne({ regNo });
-  if (regNoDuplicate) return res.status(409).json("User already exist");
+  if (regNoDuplicate) return res.status(409).json({msg: "User already exist"});
 
   try {
     // encrypting the password
@@ -48,16 +48,20 @@ export const handleNewUser = asyncHandler(async (req, res) => {
 
     if (createUser) {
       return res.status(201).json({
-        _id: createUser._id,
-        name: createUser.name,
-        email: createUser.email,
-        role: createUser.role,
-        regNo: createUser.regNo,
-        token: generateToken(createUser._id, createUser.role),
+        msg: `${createUser.role} is create successful`,
+        data: {
+          _id: createUser._id,
+          name: createUser.name,
+          email: createUser.email,
+          role: createUser.role,
+          regNo: createUser.regNo,
+          token: generateToken(createUser._id, createUser.role)
+        }
       });
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: "Internal server error"});
+    console.error(error.message);
   }
 });
 
@@ -66,12 +70,12 @@ export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password)
-  return res.status(400).json({ message: "Email and password are required" });
+  return res.status(400).json({ msg: "Email and password are required" });
   
   try {
     // validating email
     if (validateEmail(email) === false) {
-      return res.status(400).json("Invalid email");
+      return res.status(400).json({ msg: "Invalid email" });
     }
 
     //check if user exist
@@ -79,7 +83,7 @@ export const login = asyncHandler(async (req, res) => {
     if (!user)
       return res
         .status(404)
-        .json({ message: `User with this email is: ${email} not found` });
+        .json({ msg: `User with this email is: ${email} not found` });
 
     //validating user password
     const validatePassword = await bcrypt.compare(password, user.password);
@@ -87,18 +91,22 @@ export const login = asyncHandler(async (req, res) => {
     //log user in
     if (validatePassword) {
       return res.status(200).json({
-        _id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        regNo: user.regNo,
-        token: generateToken(user._id, user.role),
+        msg: "Login successful",
+        data: {
+          _id: user._id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          regNo: user.regNo,
+          token: generateToken(user._id, user.role)
+        }
       });
     } else {
-      return res.status(409).json({ message: "Invalid credentials" });
+      return res.status(409).json({ msg: "Invalid credentials" });
     }
   } catch (error) {
-    console.log(error);
+    res.status(500).json({msg: "Internal server error"});
+    console.error(error.message);
   }
 });
 
@@ -106,24 +114,34 @@ export const login = asyncHandler(async (req, res) => {
 export const getMe = asyncHandler(async (req, res) => {
   const { _id, name, email } = await User.findById(req.user.id);
 
-  res.status(200).json({
+  try{res.status(200).json({
     _id: user._id,
     email: user.email,
     name: user.name,
     role: user.role,
     regNo: user.regNo,
   });
+  } catch (error) {
+    res.status(500).json({msg: "Internal server error"});
+    console.error(error.message);
+  }
 });
 
 //get all users
 export const getUsers = asyncHandler(async (req, res) => {
-  const users = await UserModel.find().select('-password');
-  res.status(200).json({ users });
+  try {
+    
+    const users = await UserModel.find().select('-password');
+    res.status(200).json( users );
+  } catch (error) {
+    res.status(500).json({msg: "Internal server error"});
+    console.error(error.message);
+  }
 });
 
 //update user
 export const updateUser = asyncHandler(async (req, res) => {
-  const id = req.params.id;
+  try{const id = req.params.id;
   // const user = await User.findById(id);
   const { email, password, name, role } = req.body;
 
@@ -132,15 +150,15 @@ export const updateUser = asyncHandler(async (req, res) => {
 
   // validating email
   if (validateEmail(email) === false) {
-    return res.status(400).json("Invalid email");
+    return res.status(400).json({ msg: "Invalid email" });
   }
 
   if (!req.user) {
-    res.status(404).json({ message: "User not found" });
+    res.status(404).json({ msg: "User not found" });
   }
 
   if (req.user._id.toString() !== id && req.user.role !== "admin") {
-    return res.status(401).json("User not authorized");
+    return res.status(401).json({ msg: "User not authorized" });
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -155,26 +173,29 @@ export const updateUser = asyncHandler(async (req, res) => {
   );
   // const users = await User.find();
 
-  res
-    .status(200)
-    .json({ _id: update._id, email: update.email, name: update.name });
-  // res.status(200).json({ _id: update._id, email: user.email, name: user.name });
+  res.status(200).json({msg: "User updatad successfully" ,data: { _id: update._id, email: update.email, name: update.name }});
+  } catch (error) {
+    res.status(500).json({msg: "Internal server error"});
+    console.error(error.message);
+  }
 });
 
 //delete user
 export const deleteUser = asyncHandler(async (req, res) => {
-  const id = req.params.id;
+  try{const id = req.params.id;
 
   if (req.user._id.toString() !== id && req.user.role !== "admin") {
-    return res.status(401).json("User not authorized");
+    return res.status(401).json({ msg: "User not authorized" });
   }
 
   if (!req.user) {
-    res.status(404).json("User not found");
+    res.status(404).json({ msg: "User not found" });
   }
   await req.user.remove();
   // const users = await User.find();
-  res
-    .status(200)
-    .json(`User with ${req.user.email} has been deleted successfully`);
+    res.status(200).json({msg: `User with ${req.user.email} has been deleted successfully`});
+  } catch (error) {
+    res.status(500).json({msg: "Internal server error"});
+    console.error(error.message);
+  }
 });
