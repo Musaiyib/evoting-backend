@@ -187,6 +187,9 @@ export const loginVoter = asyncHandler(async (req, res) => {
     if(voter.regNo !== regNo.toLowerCase()){
       return res.status(400).json({msg: "Invalid registration number or vote token"})
     }
+    if (voter.voted) {
+      return res.status(400).json({msg: "Voter has already voted"})
+    }
     return res.status(200).json({msg: "Login successul", voter});
   } catch (error) {
     res.status(500).json({msg: "Internale server error"});

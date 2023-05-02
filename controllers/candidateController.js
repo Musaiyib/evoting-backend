@@ -74,7 +74,7 @@ export const updateCandidate = asyncHandler(async (req, res) => {
 
   const { name, nickname, regNo, level, phone, position } = req.body;
   try {
-    const update = await CandidateModel.findByIdAndUpdate(
+    await CandidateModel.findByIdAndUpdate(
       id,
       {
         name,
