@@ -88,7 +88,7 @@ export const updateCandidate = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    res.status(200).json({msg:"Candidate has successfully updated"});
+    res.status(200).json({msg:"Candidate has updated successfully"});
   } catch (error) {
     console.error(error.message);
     res.status(500).json({msg:"Unable to update candidate"});
@@ -101,7 +101,7 @@ export const deleteCandidate = asyncHandler(async (req, res) => {
 
   try {
     await CandidateModel.findByIdAndDelete(id);
-    res.status(200).json({msg:"Candidate has been delete successfully"});
+    res.status(200).json({msg:"Candidate has been deleted successfully"});
   } catch (error) {
     console.error(error.message);
     res.status(500).json({msg:"Unable to delete candidate"});
